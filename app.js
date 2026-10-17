@@ -8,6 +8,8 @@
   const CAP = window.Capacitor;
   const NATIVE = !!CAP?.isNativePlatform?.();
   const plug = (name) => (NATIVE ? CAP.Plugins?.[name] || CAP.registerPlugin?.(name) : null);
+  // In the iOS app, stop pinch and double-tap zoom so the layout can't be pushed off-screen.
+  if (NATIVE) document.querySelector('meta[name=viewport]')?.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover');
   const haptic = (kind) => { try { const H = plug('Haptics'); if (H) kind === 'success' ? H.notification({ type: 'SUCCESS' }) : H.impact({ style: 'LIGHT' }); } catch { /* no haptics */ } };
   const SCREEN_SRC = NATIVE ? 'Settings \u203a Screen Time' : 'Settings \u203a Screen Time (iPhone) or Digital Wellbeing (Android)';
 

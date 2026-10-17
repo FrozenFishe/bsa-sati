@@ -28,6 +28,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 class SatiBridgeViewController: CAPBridgeViewController {
     override func capacitorDidLoad() {
         bridge?.registerPluginInstance(SatiHealthPlugin())
+        // The app is a single column: never let the page pan sideways or show a horizontal scroll bar.
+        if let scroll = webView?.scrollView {
+            scroll.alwaysBounceHorizontal = false
+            scroll.showsHorizontalScrollIndicator = false
+        }
     }
 }
 
