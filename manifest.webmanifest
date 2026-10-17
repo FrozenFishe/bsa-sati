@@ -1,0 +1,25 @@
+{
+  "name": "Sati — Meditate & Study",
+  "short_name": "Sati",
+  "description": "A free meditation, study and mindful-phone app from the Buddhist Society of Australia.",
+  "id": "./",
+  "start_url": "./#today",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f6efe3",
+  "theme_color": "#f6efe3",
+  "lang": "en-AU",
+  "categories": ["health", "lifestyle", "education", "productivity"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ],
+  "shortcuts": [
+    { "name": "Meditate", "url": "./#meditate", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Study", "url": "./#study", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Mindful pause", "url": "./#pause", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}
