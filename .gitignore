@@ -1,4 +1,6 @@
-public/
 node_modules/
+public/
 .wrangler/
 .DS_Store
+ios/App/App/public/
+ios/App/build/

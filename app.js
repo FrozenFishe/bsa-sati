@@ -4,6 +4,13 @@
   'use strict';
   const { SCENES, scene, colors, padma, landscape, zen } = window.ART;
 
+  // Native (iOS app) bridge; every call is optional so the web build keeps working.
+  const CAP = window.Capacitor;
+  const NATIVE = !!CAP?.isNativePlatform?.();
+  const plug = (name) => (NATIVE ? CAP.Plugins?.[name] || CAP.registerPlugin?.(name) : null);
+  const haptic = (kind) => { try { const H = plug('Haptics'); if (H) kind === 'success' ? H.notification({ type: 'SUCCESS' }) : H.impact({ style: 'LIGHT' }); } catch { /* no haptics */ } };
+  const SCREEN_SRC = NATIVE ? 'Settings \u203a Screen Time' : 'Settings \u203a Screen Time (iPhone) or Digital Wellbeing (Android)';
+
   const ORG = {
     name: 'Buddhist Society of Australia',
     abn: '35 892 665 974',
@@ -59,6 +66,8 @@
     apps: ['instagram', 'tiktok', 'youtube', 'x'],
     guards: [],
     reminders: { morning: '07:00', evening: '19:30' },
+    notify: false,
+    health: false,
     created: Date.now()
   });
   let S;
@@ -242,7 +251,7 @@
         <div class="panel">
           <div class="row spread"><h3>Top distractions</h3><button class="linkbtn" data-act="checkin">Update</button></div>
           ${tops.length ? tops.map(([id, m]) => `<div class="offender">${tile(id)}<div><b>${esc(appById(id)?.name || id)}</b><span>${['games', 'news', 'other'].includes(id) ? '' : 'Social'}</span></div><em>${fmtMin(m)}</em></div>`).join('')
-            : '<p class="hb-sub">Copy today’s numbers from Settings › Screen Time (iPhone) or Digital Wellbeing (Android).</p><button class="btn light block" data-act="checkin">Add from Screen Time</button>'}
+            : `<p class="hb-sub">Copy today\u2019s numbers from ${SCREEN_SRC}.</p>` + '<button class="btn light block" data-act="checkin">Add from Screen Time</button>'}
         </div>
         <div class="panel"><div class="row spread" style="margin-bottom:8px"><h3>This week</h3><a class="linkbtn" href="#stats">Stats</a></div>${weekStrip()}</div>
         ${orgFooter()}
@@ -254,7 +263,7 @@
     cleanup = () => document.body.classList.remove('homebg');
     view.addEventListener('click', (e) => {
       const b = e.target.closest('[data-act]'); if (!b) return;
-      if (b.dataset.act === 'check') { const d = day(); d.checks[b.dataset.v] = !d.checks[b.dataset.v]; save(); render(); }
+      if (b.dataset.act === 'check') { haptic(); const d = day(); d.checks[b.dataset.v] = !d.checks[b.dataset.v]; save(); render(); }
       if (b.dataset.act === 'checkin') checkIn();
     });
   };
@@ -262,7 +271,7 @@
   function checkIn() {
     const d = day(), list = [...new Set([...S.apps, ...Object.keys(d.apps)])];
     const hrs = d.screen == null ? '' : Math.floor(d.screen), mn = d.screen == null ? '' : Math.round((d.screen % 1) * 60);
-    sheet(`<h2>From Screen Time</h2><p class="small muted">Open Settings › Screen Time (iPhone) or Digital Wellbeing (Android) and copy today’s numbers.</p>
+    sheet(`<h2>From Screen Time</h2><p class="small muted">Open ${SCREEN_SRC} and copy today\u2019s numbers.</p>
       <div class="grid3"><label class="field"><span>Hours</span><input type="number" inputmode="numeric" min="0" max="24" name="h" value="${hrs}"></label>
       <label class="field"><span>Minutes</span><input type="number" inputmode="numeric" min="0" max="59" name="m" value="${mn}"></label>
       <label class="field"><span>Pickups</span><input type="number" inputmode="numeric" min="0" max="999" name="p" value="${d.pickups ?? ''}"></label></div>
@@ -361,6 +370,8 @@
       const d = day();
       if (m >= 1) { if (o.kind === 'med') d.med += m; else d.study += m; }
       d.wanders += wanders; save();
+      haptic('success');
+      if (m >= 1 && o.kind === 'med' && S.health) plug('SatiHealth')?.saveMindfulSession({ start: Date.now() - m * 60000, end: Date.now() }).catch(() => {});
       document.body.classList.remove('immersive');
       const h = health(), good = m >= 1;
       view.innerHTML = `<div class="stack center">
@@ -472,7 +483,7 @@
       <div class="grid2"><div class="stat"><b>${d.present}</b><span>stayed present today</span></div><div class="stat"><b>${d.mindful}</b><span>opened with intention</span></div></div>
       <h3 class="sect">Set up a doorway</h3>
       <div class="card stack">
-        <p class="small muted" style="margin:0">A web app can’t lock other apps, so Sati stands at the door instead. Swap a distracting app’s icon for its doorway: three breaths, then a choice.</p>
+        <p class="small muted" style="margin:0">${NATIVE ? 'Sati stands at the door' : 'A web app can\u2019t lock other apps, so Sati stands at the door instead'}. Swap a distracting app’s icon for its doorway: three breaths, then a choice.</p>
         <select id="appsel">${S.apps.map((a) => `<option value="${a}">${appById(a).name}</option>`).join('')}</select>
         <input type="text" id="applink" readonly aria-label="Doorway link">
         <div class="row"><button class="btn soft" style="flex:1" id="copy">Copy link</button><a class="btn ghost" style="flex:1" id="try">Try it</a></div>
@@ -481,17 +492,17 @@
           <li>Tap share › <b>Add to Home Screen</b>; name it after the app.</li>
           <li>Long-press the real app › <b>Remove App</b> › <b>Remove from Home Screen</b> (it stays in the App Library).</li>
           <li>Put the doorway where the app used to be.</li></ol></details>
-        <details><summary>Android steps</summary><ol class="steps small">
+        ${NATIVE ? '' : `<details><summary>Android steps</summary><ol class="steps small">
           <li>Open the link in Chrome › <b>⋮</b> › <b>Add to Home screen</b>.</li>
-          <li>Move the real app off your home screen into the app drawer.</li></ol></details>
-        <details><summary>Want hard limits too?</summary><p class="small muted">Pair Sati with iPhone Settings › Screen Time › App Limits, or Android Digital Wellbeing › App timers. Sati adds the reflective pause; the system enforces the limit.</p></details>
+          <li>Move the real app off your home screen into the app drawer.</li></ol></details>`}
+        <details><summary>Want hard limits too?</summary><p class="small muted">Pair Sati with Settings \u203a Screen Time \u203a App Limits${NATIVE ? '' : ', or Android Digital Wellbeing \u203a App timers'}. Sati adds the reflective pause; the system enforces the limit.</p></details>
       </div>
       ${orgFooter()}
     </div>`;
   };
   V.guard.bind = () => {
-    const sel = $('#appsel'), link = $('#applink'), tryA = $('#try'), base = location.href.split('#')[0];
-    const upd = () => { link.value = `${base}#pause/${sel.value}`; tryA.href = `#pause/${sel.value}`; };
+    const sel = $('#appsel'), link = $('#applink'), tryA = $('#try'), base = NATIVE ? 'sati://' : location.href.split('#')[0] + '#';
+    const upd = () => { link.value = `${base}pause/${sel.value}`; tryA.href = `#pause/${sel.value}`; };
     if (sel) { sel.onchange = upd; upd(); }
     $('#copy').onclick = async () => { try { await navigator.clipboard.writeText(link.value); toast('Link copied'); } catch { link.select(); toast('Select and copy the link'); } };
     view.addEventListener('click', (e) => {
@@ -656,24 +667,28 @@
       <div class="row spread"><span>Meditation bell</span><div class="row"><button class="chip" data-act="bell" aria-pressed="${S.bell}">${S.bell ? 'On' : 'Off'}</button><button class="chip" data-act="testbell">Test</button></div></div>
     </div>
     <div class="card stack"><h3>Practice reminders</h3>
-      <p class="small muted">Adds two daily events, with alerts, to your phone’s calendar.</p>
+      <p class="small muted">${NATIVE ? 'A gentle notification each day at these times.' : 'Adds two daily events, with alerts, to your phone\u2019s calendar.'}</p>
       <div class="grid2"><label class="field"><span>Morning sit</span><input type="time" id="r-am" value="${S.reminders.morning}"></label>
       <label class="field"><span>Evening study</span><input type="time" id="r-pm" value="${S.reminders.evening}"></label></div>
-      <button class="btn soft block" data-act="ics">Add to calendar (.ics)</button>
+      ${NATIVE ? `<div class="row spread"><span>Daily reminders</span><button class="chip" data-act="notify" aria-pressed="${S.notify}">${S.notify ? 'On' : 'Off'}</button></div>` : '<button class="btn soft block" data-act="ics">Add to calendar (.ics)</button>'}
     </div>
-    <div class="card stack"><h3>Install Sati</h3>
+    ${NATIVE ? `<div class="card stack"><h3>Apple Health</h3>
+      <p class="small muted">Save each completed meditation to Apple Health as Mindful Minutes. Sati never reads your health data.</p>
+      <div class="row spread"><span>Log Mindful Minutes</span><button class="chip" data-act="health" aria-pressed="${S.health}">${S.health ? 'On' : 'Off'}</button></div>
+    </div>` : `<div class="card stack"><h3>Install Sati</h3>
       <p class="small muted"><b>iPhone:</b> in Safari, tap Share › Add to Home Screen. <b>Android:</b> in Chrome, tap ⋮ › Install app. It then works offline like a normal app. Long-press the icon on Android for Sit, Learn and Guard shortcuts.</p>
-    </div>
+    </div>`}
     <div class="card stack"><h3>Your data</h3>
       <p class="small muted">Everything stays on this device. Nothing is sent to the Society or anyone else.</p>
-      <div class="row"><button class="btn ghost" style="flex:1" data-act="export">Export</button><button class="btn ghost" style="flex:1" data-act="onb">Redo intro</button></div>
+      <div class="row">${NATIVE ? '' : '<button class="btn ghost" style="flex:1" data-act="export">Export</button>'}<button class="btn ghost" style="flex:1" data-act="onb">Redo intro</button></div>
       <button class="btn ghost block" data-act="reset" style="color:var(--warn)">Erase all data</button>
     </div>
     <div class="card stack"><h3>About</h3>
       <p class="small">Sati is offered freely by the <b>${ORG.name}</b>, a volunteer-run charity in Sydney helping keep the teachings of the Buddha open to all who seek them.</p>
       <p class="small muted">Registered with the Australian Charities and Not-for-profits Commission (ACNC). ABN ${ORG.abn}. <a href="${ORG.acnc}" target="_blank" rel="noopener">ACNC register</a> · <a href="${ORG.abr}" target="_blank" rel="noopener">ABN Lookup</a></p>
-      <a class="btn block" href="${ORG.give}" target="_blank" rel="noopener">Become a Dharma Friend</a>
-      <p class="small muted">Gifts support the Society’s work but are not tax-deductible. Join a meditation evening in Sydney: <a href="${ORG.contact}" target="_blank" rel="noopener">contact us</a> or email <a href="mailto:${ORG.email}">${ORG.email}</a>.</p>
+      ${NATIVE ? `<a class="btn block" href="${ORG.site}" target="_blank" rel="noopener">Visit the Society\u2019s website</a>` : `<a class="btn block" href="${ORG.give}" target="_blank" rel="noopener">Become a Dharma Friend</a>`}
+      <p class="small muted">${NATIVE ? '' : 'Gifts support the Society\u2019s work but are not tax-deductible. '}Join a meditation evening in Sydney: <a href="${ORG.contact}" target="_blank" rel="noopener">contact us</a> or email <a href="mailto:${ORG.email}">${ORG.email}</a>.</p>
+      <p class="small muted"><a href="privacy.html">Privacy Policy</a> · <a href="support.html">Support</a></p>
       <p class="small muted">Sati supports wellbeing but is not a substitute for professional care. If you are struggling, call Lifeline on <a href="tel:131114">13 11 14</a>.</p>
     </div>
     ${orgFooter()}
@@ -683,13 +698,22 @@
       const v = Number(e.target.value); if (v >= min && v <= max) { S.goals[key] = v; save(); toast('Goal saved'); } else e.target.value = S.goals[key];
     });
     num('#g-med', 'meditate', 1, 240); num('#g-study', 'study', 5, 600); num('#g-scr', 'screen', 0.5, 16);
-    $('#r-am').onchange = (e) => { S.reminders.morning = e.target.value; save(); };
-    $('#r-pm').onchange = (e) => { S.reminders.evening = e.target.value; save(); };
+    $('#r-am').onchange = (e) => { S.reminders.morning = e.target.value; save(); if (S.notify) scheduleReminders(); };
+    $('#r-pm').onchange = (e) => { S.reminders.evening = e.target.value; save(); if (S.notify) scheduleReminders(); };
     view.addEventListener('click', (e) => {
       const b = e.target.closest('[data-act]'); if (!b) return;
       const a = b.dataset.act;
       if (a === 'theme') { S.theme = b.dataset.v; save(); applyTheme(); render(); }
       if (a === 'bell') { S.bell = !S.bell; save(); render(); }
+      if (a === 'notify') {
+        (S.notify ? cancelReminders() : scheduleReminders()).then((on) => { S.notify = on; save(); render(); toast(on ? 'Reminders on' : 'Reminders off'); });
+      }
+      if (a === 'health') {
+        if (S.health) { S.health = false; save(); render(); return; }
+        plug('SatiHealth')?.requestAuthorization().then(({ granted }) => {
+          S.health = !!granted; save(); render(); toast(granted ? 'Mindful Minutes will be saved to Health' : 'Allow Sati in the Health app to turn this on');
+        }).catch(() => toast('Apple Health is not available'));
+      }
       if (a === 'testbell') { const was = S.bell; S.bell = true; bell(); S.bell = was; }
       if (a === 'ics') download('sati-reminders.ics', ics(), 'text/calendar');
       if (a === 'export') download(`sati-${dayKey()}.json`, JSON.stringify(S, null, 2), 'application/json');
@@ -697,6 +721,25 @@
       if (a === 'reset' && confirm('Erase all your practice history on this device?')) { localStorage.removeItem(KEY); S = defaults(); applyTheme(); location.hash = '#welcome'; }
     });
   };
+
+  async function scheduleReminders() {
+    const LN = plug('LocalNotifications'); if (!LN) return false;
+    try {
+      const perm = await LN.requestPermissions();
+      if (perm.display !== 'granted') { toast('Allow notifications for Sati in Settings'); return false; }
+      await LN.cancel({ notifications: [{ id: 101 }, { id: 102 }] }).catch(() => {});
+      const on = (t) => { const [hour, minute] = t.split(':').map(Number); return { hour, minute }; };
+      await LN.schedule({ notifications: [
+        { id: 101, title: 'Time to sit \u{1FAB7}', body: 'Padma is waiting. A few minutes of stillness?', schedule: { on: on(S.reminders.morning), allowWhileIdle: true }, extra: { hash: '#sit' } },
+        { id: 102, title: 'Evening study \u{1F4D6}', body: 'One focused session, one gentle return at a time.', schedule: { on: on(S.reminders.evening), allowWhileIdle: true }, extra: { hash: '#learn' } }
+      ] });
+      return true;
+    } catch { return false; }
+  }
+  async function cancelReminders() {
+    try { await plug('LocalNotifications')?.cancel({ notifications: [{ id: 101 }, { id: 102 }] }); } catch { /* none scheduled */ }
+    return false;
+  }
 
   function download(name, text, type) {
     const a = document.createElement('a');
@@ -802,6 +845,11 @@
   }
 
   window.addEventListener('hashchange', () => { render(); window.scrollTo(0, 0); });
+  if (NATIVE) {
+    // sati://pause/instagram (doorways) and reminder taps route into the app.
+    plug('App')?.addListener('appUrlOpen', ({ url }) => { location.hash = '#' + url.replace(/^sati:\/\//, ''); });
+    plug('LocalNotifications')?.addListener('localNotificationActionPerformed', ({ notification }) => { if (notification?.extra?.hash) location.hash = notification.extra.hash; });
+  }
   applyTheme();
   render();
 

@@ -1,0 +1,30 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@800;900&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;width:440px;height:956px;overflow:hidden}
+body{background:var(--bg);font-family:Nunito,sans-serif;display:flex;flex-direction:column;align-items:center}
+h1{margin:34px 24px 6px;font-size:40px;line-height:1.05;font-weight:900;text-align:center;color:#2b1d17;letter-spacing:-.01em}
+h1 span{color:var(--accent)}
+p{margin:0 30px 18px;font-size:17px;font-weight:800;color:#5b4a3c;text-align:center}
+.phone{width:350px;height:758px;border-radius:52px;background:#1b1512;padding:10px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.phone iframe{width:390px;height:844px;border:0;border-radius:44px;transform:scale(.846);transform-origin:0 0;background:#fff}
+.screen{width:330px;height:738px;border-radius:44px;overflow:hidden}
+</style></head><body>
+<h1 id="h"></h1><p id="s"></p><div class="phone"><div class="screen"><iframe id="f"></iframe></div></div>
+<script>if(new URLSearchParams(location.search).get("z"))document.documentElement.style.zoom=new URLSearchParams(location.search).get("z");
+const q=new URLSearchParams(location.search), pad=n=>String(n).padStart(2,'0'), k=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+document.body.style.setProperty('--bg', q.get('bg')||'#bfe6f7'); document.body.style.setProperty('--accent', q.get('ac')||'#b8506a');
+document.getElementById('h').innerHTML=q.get('h'); document.getElementById('s').textContent=q.get('s')||'';
+const days={}; for(let i=1;i<9;i++){const d=new Date();d.setDate(d.getDate()-i);days[k(d)]={med:12+i%4,study:30+i*2,present:2,mindful:1,wanders:0,lessons:i%3?0:1,screen:1.8+(i%3)*.3,pickups:38+i,apps:{instagram:30+i*2,youtube:18,x:12},checks:{refuge:true}}}
+const sad=q.get('mode')==='sad';
+days[k(new Date())]=sad?{med:0,study:0,present:0,mindful:2,wanders:3,lessons:0,screen:6.5,pickups:121,apps:{tiktok:150,instagram:96,youtube:60},checks:{}}
+ :{med:15,study:50,present:3,mindful:1,wanders:0,lessons:1,screen:1.6,pickups:34,apps:{instagram:31,youtube:18,x:12},checks:{refuge:true,kind:true}};
+if(sad){for(let i=1;i<9;i++){const d=new Date();d.setDate(d.getDate()-i);delete days[k(d)]}}
+localStorage['sati.v1']=JSON.stringify({onboarded:true,theme:'light',scene:q.get('scene')||'pond',days,lessons:{refuges:'x',truths:'x',path:'x'},
+ guards:[{id:'g1',preset:'study',name:'Study Hall',mood:'study',start:'00:00',end:'23:59',days:[0,1,2,3,4,5,6],apps:[],on:true},{id:'g2',preset:'night',name:'Night Rest',mood:'sleep',start:'21:30',end:'06:30',days:[0,1,2,3,4,5,6],apps:[],on:true}]});
+const f=document.getElementById('f'); f.src='../index.html#'+(q.get('v')||'today');
+f.onload=()=>{const w=f.contentWindow,doc=f.contentDocument; setTimeout(()=>{
+  const act=q.get('act'); if(act==='sit'){doc.querySelector('[data-act=dur][data-v="20"]').click(); doc.querySelector('[data-act=start]').click();}
+  if(q.get('scroll')) w.scrollTo(0,+q.get('scroll'));
+},400)};
+</script></body></html>

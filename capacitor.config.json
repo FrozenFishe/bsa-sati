@@ -1,0 +1,15 @@
+{
+  "appId": "org.buddhistsocietiesofaustralia.sati",
+  "appName": "Sati",
+  "webDir": "public",
+  "ios": {
+    "contentInset": "never",
+    "scheme": "Sati",
+    "backgroundColor": "#f6efe3",
+    "limitsNavigationsToAppBoundDomains": false
+  },
+  "plugins": {
+    "SplashScreen": { "launchShowDuration": 600, "backgroundColor": "#f6efe3", "showSpinner": false },
+    "LocalNotifications": { "iconColor": "#b8506a" }
+  }
+}
