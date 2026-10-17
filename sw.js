@@ -1,6 +1,6 @@
 // Offline-first cache for the app shell; fonts are cached as they load.
-const CACHE = 'sati-v1';
-const SHELL = ['./', 'index.html', 'app.css', 'app.js', 'content.js', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-180.png'];
+const CACHE = 'sati-v2';
+const SHELL = ['./', 'index.html', 'app.css', 'app.js', 'content.js', 'art.js', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-180.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));

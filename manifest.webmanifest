@@ -18,8 +18,8 @@
     { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }
   ],
   "shortcuts": [
-    { "name": "Meditate", "url": "./#meditate", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
-    { "name": "Study", "url": "./#study", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
-    { "name": "Mindful pause", "url": "./#pause", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+    { "name": "Sit", "url": "./#sit", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Learn", "url": "./#learn", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Guard", "url": "./#guard", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
   ]
 }
