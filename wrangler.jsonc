@@ -5,5 +5,14 @@
   "compatibility_date": "2026-10-01",
   "assets": { "directory": "./public", "not_found_handling": "single-page-application" },
   "routes": [{ "pattern": "sati.buddhistsocietiesofaustralia.org", "custom_domain": true }],
-  "workers_dev": true
+  "workers_dev": true,
+  "env": {
+    // Staging: every build lands here first and is promoted by hand (./promote.sh).
+    "play": {
+      "name": "sati-play",
+      "assets": { "directory": "./public", "not_found_handling": "single-page-application" },
+      "routes": [{ "pattern": "play.sati.buddhistsocietiesofaustralia.org", "custom_domain": true }],
+      "workers_dev": false
+    }
+  }
 }
