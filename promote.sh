@@ -3,7 +3,9 @@
 set -e
 cd "$(dirname "$0")"
 play=$(curl -fsS https://play.sati.buddhistsocietiesofaustralia.org/version.txt)
-prod=$(curl -fsS https://sati.buddhistsocietiesofaustralia.org/version.txt 2>/dev/null || echo none)
+prod=$(curl -fsS https://sati.buddhistsocietiesofaustralia.org/version.txt 2>/dev/null || true)
+# Before the first promote, production falls back to index.html for this path.
+echo "$prod" | grep -qE '^[0-9a-f]{7,40}$' || prod=none
 head=$(git rev-parse --short HEAD)
 if [ "$play" != "$head" ] || [ -n "$(git status --porcelain)" ]; then
   echo "Staging has $play but this checkout is $head (or has uncommitted changes)." >&2
