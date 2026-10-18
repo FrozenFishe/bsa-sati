@@ -49,7 +49,7 @@ Static files, with no build step:
 python3 -m http.server 8765   # http://127.0.0.1:8765
 ```
 
-Deploy: `./build.sh && npx wrangler deploy` (with `CLOUDFLARE_ACCOUNT_ID` set to the Society's account).
+Deploy: `./build.sh && npx wrangler deploy` (the account is pinned in `wrangler.jsonc`).
 `build.sh` copies the app into `public/`, the Worker's assets directory.
 Bump `CACHE` in `sw.js` when shipping changes.
 

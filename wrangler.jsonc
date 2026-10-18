@@ -1,5 +1,7 @@
 {
   "name": "sati",
+  // The i.quietus Cloudflare account, which holds buddhistsocietiesofaustralia.org.
+  "account_id": "2bfd30a7b8e30a8d7fd1a01304741752",
   "compatibility_date": "2026-10-01",
   "assets": { "directory": "./public", "not_found_handling": "single-page-application" },
   "routes": [{ "pattern": "sati.buddhistsocietiesofaustralia.org", "custom_domain": true }],
