@@ -49,7 +49,15 @@ Static files, with no build step:
 python3 -m http.server 8765   # http://127.0.0.1:8765
 ```
 
-Deploy: `./build.sh && npx wrangler deploy` (the account is pinned in `wrangler.jsonc`).
+Deploy goes through staging, and a person approves each release (the account is pinned in `wrangler.jsonc`):
+
+1. `./deploy-play.sh` deploys the current commit to https://play.sati.buddhistsocietiesofaustralia.org
+   (Worker `sati-play`, not indexed by search engines).
+2. Try it there on a phone and a desktop.
+3. `./promote.sh` shows which commits would go live, asks for a yes, then deploys that same commit
+   to production. It refuses if your checkout doesn't match what's on staging.
+
+Both sites serve `/version.txt` with the commit they're running.
 `build.sh` copies the app into `public/`, the Worker's assets directory.
 Bump `CACHE` in `sw.js` when shipping changes.
 
