@@ -16,17 +16,17 @@ ScreensDesign UI breakdown of the app. A summary of the findings is in
 
 | Brainrot (App Store screenshots + REA capture) | Sati equivalent |
 | --- | --- |
-| Home: mascot in a landscape, big %, progress bar, Screen Time / Pickups / Focus tiles, Top Offenders, 🔥 streak | **Home**: Padma the lotus in a scene, clarity %, bar, Screen time / Pickups / Practice tiles, Top distractions, 🪔 streak |
-| Mascot and world decay as screen time grows | The scene goes grey, the pond dries and stalks wither; Padma slumps and frowns |
+| Home: mascot in a landscape, big %, progress bar, Screen Time / Pickups / Focus tiles, Top Offenders, 🔥 streak | **Home**: Padma in a clay scene, one-tap sit, daily practice list, Screen Time check-in; an evening version after 7 pm |
+| Mascot and world decay as screen time grows | **Padma’s garden**: Seed, Sprout, Bloom by how many of the last 7 days you practised |
 | Block tab: Add Blocker, Blocking Now (Active), Presets, Your Lists | **Guard** tab: scheduled guards (Study Hall, Morning Sit, Night Rest, Weekend Retreat, custom), Active badge, your app list, doorway setup |
 | Intervention before opening a blocked app (5/10/15/30 min) | **Doorway**: 3 breaths (5 during a guard), then *stay present* or *use with intention* |
-| Focus mode: mascot meditating in a zen garden, big timer, stop button | **Sit** (centre tab): Padma under a Bodhi tree in a raked garden, outlined timer, "Keep going!" bar, stop button, open sit |
+| Focus mode: mascot meditating in a zen garden, big timer, stop button | **Sit** (centre tab): four practices, quick or custom length, interval bell; a dark session screen with big timer, guided cues, pause and finish |
 | Widgets: reminders checklist, Start Focus, live timer | Daily practice checklist on Home, timer in the tab title, Android shortcuts, calendar (`.ics`) reminders |
-| Unlock rewards, customise the app | **Rewards**: streaks unlock scenes (Forest monastery, Full-moon night, Mountain temple, Bodhi at sunset) |
+| Unlock rewards, customise the app | **Stats**: week / month / year minutes, days practised, moments with your reflections |
 | Onboarding slider, attention profile, years-lost visual | The same flow, tied to the Five Hindrances |
 | Hard paywall | None: free, no account, no ads, data on device; Dharma Friend giving link |
 
-All artwork (`art.js`) is original SVG. Only the layouts and features follow the reference.
+The clay artwork of Padma (`art/`) was generated for Sati on our own GPUs. Only the layouts and features follow the reference.
 
 Additions: a meditation timer with a synthesised singing bowl, interval bells and guided cues
 (breath, mettā, body scan, silent), and a Dharma library of 8 lessons with flashcards.
@@ -61,5 +61,9 @@ Both sites serve `/version.txt` with the commit they're running.
 `build.sh` copies the app into `public/`, the Worker's assets directory.
 Bump `CACHE` in `sw.js` when shipping changes.
 
-Files: `index.html`, `app.css`, `app.js` (views, scoring, timer, onboarding), `content.js`
-(lessons and techniques), `sw.js` (offline), `manifest.webmanifest`, `icons/`.
+Test: `npm test` runs the Playwright browser tests in `tests/` at iPhone size, in light and dark
+mode (first time: `npx playwright install chromium`). CI runs them on every push and pull request.
+
+Files: `index.html`, `app.css`, `app.js` (views, timer, onboarding), `content.js`
+(lessons and techniques), `art/` (pictures), `sw.js` (offline), `manifest.webmanifest`, `icons/`,
+`fonts/` (Fraunces, bundled so the app makes no outside requests).

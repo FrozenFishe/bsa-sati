@@ -1,9 +1,10 @@
-# Compiles the iOS app without signing on every push, so build errors show up early.
+# Compiles the iOS app without signing on every push and pull request, so build errors show up early.
 name: iOS build check
 
 on:
   push:
     branches: [main, master]
+  pull_request:
   workflow_dispatch:
 
 jobs:
