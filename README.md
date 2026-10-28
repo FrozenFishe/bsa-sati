@@ -62,7 +62,7 @@ Both sites serve `/version.txt` with the commit they're running.
 Bump `CACHE` in `sw.js` when shipping changes.
 
 Test: `npm test` runs the Playwright browser tests in `tests/` at iPhone size, in light and dark
-mode (first time: `npx playwright install chromium`). CI runs them on every push and pull request.
+mode (first time: `npx playwright install chromium`).
 
 Files: `index.html`, `app.css`, `app.js` (views, timer, onboarding), `content.js`
 (lessons and techniques), `art/` (pictures), `sw.js` (offline), `manifest.webmanifest`, `icons/`,
