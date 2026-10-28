@@ -16,13 +16,13 @@ ScreensDesign UI breakdown of the app. A summary of the findings is in
 
 | Brainrot (App Store screenshots + REA capture) | Sati equivalent |
 | --- | --- |
-| Home: mascot in a landscape, big %, progress bar, Screen Time / Pickups / Focus tiles, Top Offenders, 🔥 streak | **Home**: Padma in a clay scene, one-tap sit, daily practice list, Screen Time check-in; an evening version after 7 pm |
-| Mascot and world decay as screen time grows | **Padma’s garden**: Seed, Sprout, Bloom by how many of the last 7 days you practised |
+| Home: mascot in a landscape, big %, progress bar, Screen Time / Pickups / Focus tiles, Top Offenders, 🔥 streak | **Home is the daily lotus**: sit at least 5 minutes a day to water it and it grows through 10 stages to a bloom; each missed day wilts it a stage, three in a row wither it |
+| Mascot and world decay as screen time grows | The lotus fades when a day is missed; your bloomed lotuses are counted |
 | Block tab: Add Blocker, Blocking Now (Active), Presets, Your Lists | **Guard** tab: scheduled guards (Study Hall, Morning Sit, Night Rest, Weekend Retreat, custom), Active badge, your app list, doorway setup |
 | Intervention before opening a blocked app (5/10/15/30 min) | **Doorway**: 3 breaths (5 during a guard), then *stay present* or *use with intention* |
 | Focus mode: mascot meditating in a zen garden, big timer, stop button | **Sit** (centre tab): four practices, quick or custom length, interval bell; a dark session screen with big timer, guided cues, pause and finish |
 | Widgets: reminders checklist, Start Focus, live timer | Daily practice checklist on Home, timer in the tab title, Android shortcuts, calendar (`.ics`) reminders |
-| Unlock rewards, customise the app | **Stats**: week / month / year minutes, days practised, moments with your reflections |
+| Unlock rewards, customise the app | **Stats**: week / month / year minutes, days practised, moments with your reflections, Screen Time check-in |
 | Onboarding slider, attention profile, years-lost visual | The same flow, tied to the Five Hindrances |
 | Hard paywall | None: free, no account, no ads, data on device; Dharma Friend giving link |
 
