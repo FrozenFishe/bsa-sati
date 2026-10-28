@@ -62,6 +62,7 @@
     sun: '<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/>',
     plus: '<path d="M12 5.5v13M5.5 12h13"/>',
     seed: '<path d="M12 4c4 4 5 8.5 2.5 12.5S7 19 7.5 14 10 7 12 4z"/>',
+    drop: '<path d="M12 3.5c3.5 4.3 6 7.6 6 10.5a6 6 0 0 1-12 0c0-2.9 2.5-6.2 6-10.5z"/>',
     sprout: '<path d="M12 20v-8M12 12c0-4-3-6-7-6 0 4 3 6 7 6zM12 12c0-4 3-6 7-6 0 4-3 6-7 6z"/>',
     leaf: '<path d="M5 19C5 10 10 5 19 5c0 9-5 14-14 14zM5 19l8-8"/>',
     info: '<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5M12 8h.01"/>',
@@ -108,10 +109,12 @@
     reminders: { morning: '07:00', evening: '19:30' },
     notify: false,
     health: false,
+    lotus: { stage: 0, planted: null, checked: null, grownOn: null, missed: 0, bloomed: 0, news: null, seen: null },
     created: Date.now()
   });
   let S;
   try { S = Object.assign(defaults(), JSON.parse(localStorage.getItem(KEY) || '{}')); } catch { S = defaults(); }
+  S.lotus = Object.assign(defaults().lotus, S.lotus);
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch { /* private mode */ } };
 
   const pad = (n) => String(n).padStart(2, '0');
@@ -126,11 +129,36 @@
   const DAYN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   const practised = (k) => { const d = peek(k); return !!d && (d.med > 0 || d.study > 0 || d.lessons > 0); };
+
+  /* ---------- daily lotus: a 5-minute sit waters it, missed days wilt it ---------- */
+  const LOTUS_MIN = 5;
+  const LOTUS_NAMES = ['Seed', 'Planted', 'Waking', 'Sprout', 'First leaf', 'Leaves', 'Stem', 'Bud', 'Blushing bud', 'Opening', 'Bloom'];
+  const watered = (k) => (peek(k)?.med || 0) >= LOTUS_MIN;
+  const nextKey = (k) => { const [y, m, d] = k.split('-').map(Number); return dayKey(new Date(y, m - 1, d + 1)); };
   function streak() {
     let n = 0, d = new Date();
-    if (!practised(dayKey(d))) d = addDays(d, -1);
-    while (practised(dayKey(d))) { n++; d = addDays(d, -1); }
+    if (!watered(dayKey(d))) d = addDays(d, -1);
+    while (watered(dayKey(d))) { n++; d = addDays(d, -1); }
     return n;
+  }
+  // Settles every day since the last check, so the result doesn't depend on when the app was open.
+  function tendLotus() {
+    const L = S.lotus, today = dayKey(), yest = dayKey(addDays(new Date(), -1)), growing = () => L.stage > 0 && L.stage < 10;
+    const grow = (k) => { L.stage++; L.grownOn = k; L.missed = 0; if (L.stage === 10) { L.bloomed++; L.news = 'bloomed'; } };
+    // Day keys are zero-padded, so comparing strings compares dates.
+    let k = [L.checked && nextKey(L.checked), L.planted].filter(Boolean).sort().at(-1);
+    for (; growing() && k && k <= yest; k = nextKey(k)) {
+      if (watered(k)) { if (L.grownOn !== k) grow(k); else L.missed = 0; }
+      else if (++L.missed >= 3) { L.stage = 0; L.news = 'withered'; }
+      else { L.stage = Math.max(1, L.stage - 1); L.news = 'wilted'; }
+    }
+    if (growing() && watered(today) && L.grownOn !== today) grow(today);
+    if (!L.checked || L.checked < yest) L.checked = yest;
+    save();
+  }
+  function plantLotus() {
+    Object.assign(S.lotus, { stage: 1, planted: dayKey(), grownOn: null, missed: 0, news: null, checked: dayKey(addDays(new Date(), -1)) });
+    tendLotus();
   }
 
   /* ---------- guards (scheduled doorways) ---------- */
@@ -223,49 +251,43 @@
 
   const V = {};
 
-  /* ----- Home ----- */
-  const evening = () => { const h = new Date().getHours(); return h >= 19 || h < 4; };
-  let moreOpen = false;
+  /* ----- Home: the daily lotus ----- */
+  const LOTUS_NEWS = { wilted: 'Your lotus missed its water and lost a stage.', withered: 'Your lotus withered after three dry days. Plant a new seed when you’re ready.', bloomed: 'Your lotus has bloomed. Sādhu!' };
   V.today = () => {
-    const d = day(), g = S.goals, st = streak(), les = nextLesson();
-    const progress = (got, goal) => (got >= goal ? 'Done today' : got > 0 ? `${Math.round(got)} of ${goal} minutes` : `${goal} minutes`);
-    const top = evening()
-      ? `<div><h1>Let the day settle.</h1><p class="lead">A calmer mind for a kinder tomorrow.</p></div>
-        <a class="hero garden-link" href="#garden" aria-label="Visit Padma’s garden">${img('evening')}</a>
-        <div class="evening"><div class="eyebrow">An evening practice</div><h2>A quiet 5-minute sit</h2><p class="muted">Nothing to achieve. Just be here.</p>
-          <button class="btn block" data-act="quick" data-v="5">${icon('lotus')}Begin evening sit${icon('arrow')}</button></div>
-        ${row({ href: '#guard', ic: 'moon', tone: 'soft-rose', title: 'Night Rest', sub: 'Create space before sleep' })}`
-      : `<div class="hero"><a class="garden-link" href="#garden" aria-label="Visit Padma’s garden">${img('home')}</a><div class="headline"><h1>A little space<br>for you.</h1></div></div>
-        <div class="homecard"><h2>Grow at your own pace</h2><p>${st > 1 ? `${st} days in a row. Padma is growing.` : 'One mindful moment is a good beginning.'}</p>
-          <button class="btn block" data-act="quick" data-v="${g.meditate}"><span class="play">${icon('play')}</span>Begin a ${g.meditate}-minute sit</button></div>`;
-    const extra = [['refuge', 'Recite the Three Refuges', 'Buddha, Dhamma, Sangha', 'people'], ['kind', 'One act of kindness', 'Small and quiet is enough', 'heart']];
-    return `<div class="stack">
+    const L = S.lotus, d = day(), st = streak(), today = dayKey(), left = Math.max(0, Math.ceil(LOTUS_MIN - d.med));
+    const growing = L.stage > 0 && L.stage < 10;
+    const status = growing ? (left ? `Needs water: ${left} more minute${left === 1 ? '' : 's'} today` : 'Watered today')
+      : L.stage ? 'Fully bloomed. Plant a new seed to begin again.' : 'Plant it, then sit 5 minutes a day to help it grow.';
+    const week = [...Array(7)].map((_, i) => {
+      const dt = addDays(new Date(), i - 6), k = dayKey(dt), p = peek(k);
+      const s = watered(k) ? 'wet' : L.planted && k >= L.planted && k < today ? 'dry' : '';
+      const care = p && (p.study > 0 || p.lessons > 0);
+      return `<li class="${s}" aria-label="${DAYN[dt.getDay()]}: ${s === 'wet' ? 'watered' : s === 'dry' ? 'missed' : 'no sit'}${care ? ', extra care' : ''}"><span>${DAYN[dt.getDay()][0]}</span><i></i>${care ? icon('drop', 'i care') : ''}</li>`;
+    }).join('');
+    return `<div class="stack lotushome">
       ${header()}
-      ${top}
-      <hr class="divider">
-      <h2>Your daily practice</h2>
-      <div class="list">
-        ${row({ href: '#sit', ic: 'lotus', tone: 'gold', title: 'Meditate', sub: progress(d.med, g.meditate), cls: d.med >= g.meditate ? 'done' : '' })}
-        ${row({ href: '#learn/focus', ic: 'book', tone: 'sage', title: 'Focus study', sub: progress(d.study, g.study), cls: d.study >= g.study ? 'done' : '' })}
-        ${row({ href: `#lesson/${les.id}`, ic: 'doc', tone: 'rose', title: 'Read a Dharma lesson', sub: d.lessons ? 'Done today' : `${les.minutes} minutes`, cls: d.lessons ? 'done' : '' })}
+      <figure class="lotus ${L.missed ? 'wilt' : ''} ${L.grownOn === today && L.seen !== today ? 'grow' : ''}">${img('garden')}</figure>
+      <div class="center">
+        <h1>${L.stage ? `Stage ${L.stage} of 10 · ${LOTUS_NAMES[L.stage]}` : 'A seed in your hand'}</h1>
+        <div class="lotusbar" role="img" aria-label="${L.stage} of 10 stages">${[...Array(10)].map((_, i) => `<i class="${i < L.stage ? 'on' : ''}"></i>`).join('')}</div>
+        ${L.news ? `<p class="news">${LOTUS_NEWS[L.news]}</p>` : ''}
+        <p class="lead">${status}</p>
+        ${st > 1 ? `<p class="small muted">${st} days in a row</p>` : ''}
       </div>
-      <details class="more" ${moreOpen ? 'open' : ''}><summary><span class="textlink">View all practices${icon('arrow')}</span></summary>
-        <div class="list">
-          ${extra.map(([id, t, s, ic]) => row({ act: 'check', v: id, ic, tone: 'soft-sage', title: t, sub: s, pressed: !!d.checks[id], cls: d.checks[id] ? 'done' : '', end: d.checks[id] ? doneMark : '' })).join('')}
-          ${row({ act: 'checkin', ic: 'phone', tone: 'soft-rose', title: 'Screen Time check-in', sub: d.screen == null ? `Copy today’s numbers · aim for under ${g.screen}h` : `${fmtMin(d.screen * 60)} today${d.pickups != null ? ` · ${d.pickups} pickups` : ''}` })}
-        </div>
-      </details>
+      ${growing ? `<button class="btn block" data-act="quick" data-v="${LOTUS_MIN}">${icon('drop')}${left ? `Water your lotus · ${LOTUS_MIN} min` : 'Sit again'}</button>`
+        : `<button class="btn block" data-act="plant">${icon('seed')}${L.stage ? 'Plant a new seed' : 'Plant your seed'}</button>`}
+      <ol class="lotusweek">${week}</ol>
+      ${L.bloomed ? `<p class="small center muted">${icon('lotus')} ${L.bloomed} lotus${L.bloomed === 1 ? '' : 'es'} bloomed</p>` : ''}
       ${orgFooter()}
     </div>`;
   };
   V.today.bind = () => {
-    $('details.more', view)?.addEventListener('toggle', (e) => { moreOpen = e.target.open; });
+    const L = S.lotus;
+    if (L.news || L.grownOn === dayKey()) { L.news = null; L.seen = dayKey(); save(); } // news and the grow animation show once
     view.addEventListener('click', (e) => {
       const b = e.target.closest('[data-act]'); if (!b) return;
-      const a = b.dataset.act;
-      if (a === 'quick') runSession({ kind: 'med', minutes: Number(b.dataset.v), tech: TECHNIQUES[0], interval: 0 });
-      if (a === 'check') { haptic(); const d = day(); d.checks[b.dataset.v] = !d.checks[b.dataset.v]; save(); render(); }
-      if (a === 'checkin') checkIn();
+      if (b.dataset.act === 'quick') runSession({ kind: 'med', minutes: Number(b.dataset.v), tech: TECHNIQUES[0], interval: 0 });
+      if (b.dataset.act === 'plant') { haptic('success'); plantLotus(); render(); }
     });
   };
 
@@ -290,29 +312,6 @@
       });
     });
   }
-
-  /* ----- Padma's garden ----- */
-  V.garden = () => {
-    const n = [...Array(7)].filter((_, i) => practised(dayKey(addDays(new Date(), -i)))).length;
-    const stage = n >= 5 ? 2 : n >= 2 ? 1 : 0;
-    return `<div class="stack">
-      ${titleBar('#today', 'Home', 'Padma’s garden', `<button class="iconbtn bare" data-act="info" aria-label="About the garden">${icon('info')}</button>`)}
-      <div class="hero">${img('garden')}<div class="headline"><h1>Small moments.<br>Steady growth.</h1></div></div>
-      <div class="stages">${[['seed', 'Seed'], ['sprout', 'Sprout'], ['lotus', 'Bloom']].map(([ic, l], i) => `${i ? '<span class="stage-gap"></span>' : ''}<div class="stage ${i === stage ? 'on' : ''}" ${i === stage ? 'aria-current="step"' : ''}>${ico(ic)}<span>${l}</span></div>`).join('')}</div>
-      <p class="small center muted">${n} of the last 7 days practised. Every practice helps your garden grow.</p>
-      <hr class="divider">
-      <h2>Ways to nurture Padma</h2>
-      <div class="list">
-        ${row({ href: '#sit', ic: 'person', tone: 'gold', title: 'Sit with your breath', sub: 'Find calm, one breath at a time.' })}
-        ${row({ href: '#learn', ic: 'book', tone: 'sage', title: 'Learn something meaningful', sub: 'Explore the Buddha’s teachings.' })}
-        ${row({ href: '#guard', ic: 'phone', tone: 'rose', title: 'Pause before you scroll', sub: 'Bring more presence to your day.' })}
-      </div>
-      <a class="btn ghost block" href="#today">Return to today</a>
-    </div>`;
-  };
-  V.garden.bind = () => view.addEventListener('click', (e) => {
-    if (e.target.closest('[data-act=info]')) toast('Padma grows from seed to bloom as you practise on more days of the week.');
-  });
 
   /* ----- Sit (meditation) ----- */
   let medPick = { tech: 'breath', min: null, interval: 0 };
@@ -705,12 +704,14 @@
       </div>
       ${moments.length ? `<h2 class="sect">Moments that mattered</h2><div class="group">${moments.map(({ i, dt, d }) => { const sat = d.med >= d.study; return `<div class="item">${ico(sat ? 'sprout' : 'book', sat ? 'soft-sage' : '')}<span class="t"><b>${d.note ? `“${esc(d.note)}”` : sat ? 'A quiet sit' : 'Learning with intention'}</b><span class="sub">${[d.med && `${fmtMin(d.med)} meditation`, d.study && `${fmtMin(d.study)} study`].filter(Boolean).join(' · ')}</span></span><span class="small muted">${i ? DAYN[dt.getDay()] : 'Today'}</span></div>`; }).join('')}</div>` : ''}
       ${tops.length ? `<h2 class="sect">Top distractions</h2><div class="group">${tops.map(([id, m]) => `<div class="offender">${tile(id)}<b>${esc(appById(id)?.name || id)}</b><em>${fmtMin(m)}</em></div>`).join('')}</div>` : ''}
+      <div class="list">${row({ act: 'checkin', ic: 'phone', tone: 'soft-rose', title: 'Screen Time check-in', sub: day().screen == null ? `Copy today’s numbers · aim for under ${S.goals.screen}h` : `${fmtMin(day().screen * 60)} today${day().pickups != null ? ` · ${day().pickups} pickups` : ''}` })}</div>
       <div class="promo">${img('garden')}<span class="t"><h3>Progress is returning,<br>again and again.</h3></span></div>
       ${orgFooter()}
     </div>`;
   };
   V.stats.bind = () => view.addEventListener('click', (e) => {
     const b = e.target.closest('[data-act=range]'); if (b) { range = b.dataset.v; render(); }
+    if (e.target.closest('[data-act=checkin]')) checkIn();
   });
 
   /* ----- settings ----- */
@@ -824,6 +825,7 @@
     cancelReminders();
     // Reminders and Health need this device's permission again, so they start off.
     S = Object.assign(defaults(), d, { notify: false, health: false, onboarded: true });
+    S.lotus = Object.assign(defaults().lotus, S.lotus);
     S.apps = (Array.isArray(S.apps) ? S.apps : []).filter(appById);
     if (!S.apps.length) S.apps = defaults().apps;
     const hm = /^\d\d:\d\d$/;
@@ -916,7 +918,7 @@
   };
 
   /* ---------- router ---------- */
-  const ALIAS = { meditate: 'sit', insights: 'stats' };
+  const ALIAS = { meditate: 'sit', insights: 'stats', garden: 'today' };
   const fill = (r) => r.style.setProperty('--fill', `${(r.value - r.min) / (r.max - r.min) * 100}%`);
   document.addEventListener('input', (e) => { if (e.target.type === 'range') fill(e.target); });
   let shown = '';
@@ -929,6 +931,7 @@
     if (name === 'pause' && !arg) name = 'guard';
     if (!S.onboarded && name !== 'pause') name = 'welcome';
     if (!V[name]) name = 'today';
+    if (S.onboarded) tendLotus();
     view.innerHTML = V[name](arg && decodeURIComponent(arg));
     V[name].bind?.(arg && decodeURIComponent(arg));
     view.querySelectorAll('input[type=range]').forEach(fill);
