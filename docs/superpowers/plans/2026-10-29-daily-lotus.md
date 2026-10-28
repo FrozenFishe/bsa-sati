@@ -4,7 +4,9 @@
 
 **Goal:** A required 5-minute daily sit grows a lotus through 10 stages; missed days wilt it and 3 in a row wither it.
 
-**Architecture:** All in `app.js` like the rest of the app. A small replay function, `tendLotus()`, settles growth and penalties from `S.days[k].med` whenever the app renders or a sit ends, so the result doesn't depend on when the app was open. The garden view is rebuilt around it; Home, session complete and the morning reminder read it.
+**Architecture:** All in `app.js` like the rest of the app. A small replay function, `tendLotus()`, settles growth and penalties from `S.days[k].med` whenever the app renders or a sit ends, so the result doesn't depend on when the app was open. Home becomes the lotus screen (the garden merges into it); session complete and the morning reminder read it.
+
+**Order:** Tasks 2 → 3 → 1 → 4. The studio was scaled to 0 on 29 Oct, so the art comes after the code. Until then `img('lotus-N')` falls back to `art/garden.webp`.
 
 **Tech Stack:** Vanilla JS PWA, Playwright tests (`npm test`), studio MCP for art (krea2 base, qwen edits).
 
@@ -88,47 +90,68 @@
   ```
 
   `plantLotus()` sets stage 1, planted = today, grownOn = null, missed = 0, checked = yesterday, then calls `tendLotus()`. Restore sets `S.lotus = Object.assign(defaults().lotus, S.lotus)`, and so does load.
-- [ ] **Step 4: Rebuild `V.garden`.**
-  - Title bar as now.
-  - `img('lotus-' + stage)` in a `.lotus` figure, with class `wilt` when `missed > 0`.
-  - `Stage N of 10 · Name` as the h1 (stage 0 shows `A seed in your hand`).
-  - A 10-segment `.lotusbar`.
-  - The status line: `Watered today`, or `Needs water: N more minutes today`.
-  - The `news` line, shown once and then cleared:
+- [ ] **Step 4: Make Home the lotus.**
+  - Replace `V.today` with the lotus screen (spec, "Where it shows up"). Delete `V.garden`, add
+    `garden: 'today'` to `ALIAS`, and delete the evening version, `moreOpen`, the practice list, the
+    `extra` checks and their `check` handler.
+  - Layout:
+    - `header()`
+    - `img('lotus-' + stage)` in a `.lotus` figure, with class `wilt` when `missed > 0`
+    - `Stage N of 10 · Name` as the h1 (stage 0 shows `A seed in your hand`)
+    - a 10-segment `.lotusbar`
+    - the status line: `Watered today`, or `Needs water: N more minutes today`
+    - `N days in a row` when the streak is above 1
+  - The `news` line is shown once and then cleared:
     - wilted: `Your lotus missed its water and lost a stage.`
     - withered: `Your lotus withered after three dry days. Plant a new seed when you’re ready.`
     - bloomed: `Your lotus has bloomed. Sādhu!`
-  - Buttons:
+  - One button:
     - stage 0: `Plant your seed`
     - stage 10: `Plant a new seed`
-    - otherwise, while not watered: `Sit 5 minutes`, which runs `runSession({ kind: 'med', minutes: 5, tech: TECHNIQUES[0], interval: 0 })`
+    - otherwise: `Water your lotus · 5 min`, which runs `runSession({ kind: 'med', minutes: 5, tech: TECHNIQUES[0], interval: 0 })`.
+      It stays available after watering, as `Sit again`.
   - The last 7 days as dots: watered, missed (planted and dry), or blank, plus a small drop when `study > 0 || lessons > 0`.
-  - `N lotus(es) bloomed` when the count is above 0.
-  - The info toast explains the rule in one sentence.
-  - The `.wilt` filter is `grayscale(.6) brightness(.92)`. Under `prefers-reduced-motion`, leave out the grow animation (`@keyframes grow`, a scale from .96 to 1, played once when `grownOn === today` and not yet seen).
+  - `N lotus(es) bloomed` when the count is above 0, and `orgFooter()`.
+  - CSS:
+    - Replace the `.stages/.stage/.stage-gap` and `.homecard`/`.evening` rules that are no longer used.
+    - The `.wilt` filter is `grayscale(.6) brightness(.92)`.
+    - `@keyframes grow` (a scale from .96 to 1) plays once when `grownOn === today` and `seen !== today`. It's off under `prefers-reduced-motion`.
+  - Tests that this breaks:
+    - Remove `garden` from the route list.
+    - Update `onboarding ends on Home` if it checks the old h1.
 - [ ] **Step 5:** Run `npm test`. Expected: all pass, the 9 new tests included.
 - [ ] **Step 6:** Commit: `git commit -m "Daily lotus: growth, wilting and the garden"`
 
-### Task 3: Home, session complete, reminder
+### Task 3: Session complete, Screen Time check-in in Stats, reminder
 
 **Files:**
-- Modify: `app.js`: `V.today` Meditate row (~line 246) and streak text (~238), the session-complete block (~403–417), reminder 101 (~794)
+- Modify: `app.js`: session end (~403–417), `V.stats`, reminder 101 (~794); move the `checkin` sheet handler from `V.today.bind` to `V.stats.bind`
 - Test: `tests/app.spec.js`
 
 **Interfaces:**
-- Consumes: `LOTUS_MIN`, `watered`, `tendLotus`, `S.lotus`, `LOTUS_NAMES` from Task 2.
+- Consumes: `LOTUS_MIN`, `watered`, `tendLotus`, `S.lotus` from Task 2.
 
-- [ ] **Step 1: Write the failing tests.**
-  - `home shows what the lotus still needs`: lotus stage 3 and today med 2. The first row reads `Water your lotus` and `3 more minutes today`. With today med 6, the row has class `done`.
-  - `two short sits water the lotus`: lotus stage 3 (`checked` = −1) and today med 0. Run two 3-minute sits with the clock, as in `a timed sit logs its minutes`. After the second, expect the text `Your lotus is watered` and `Stage 4`.
-- [ ] **Step 2:** Run `npx playwright test -g "lotus|short sits"`. Expected: the new tests FAIL.
+- [ ] **Step 1: Write and update the tests.**
+  - `two short sits water the lotus`: lotus stage 3 (`checked` = −1) and today med 0. Run two 3-minute sits with the clock, as in `a timed sit logs its minutes`. After the second, expect `Your lotus is watered` and `Stage 4`.
+  - `home shows what the lotus still needs`: lotus stage 3 and today med 2. Home reads `Needs water: 3 more minutes today`.
+  - Change `the Screen Time check-in saves` so it opens it from `#stats`.
+- [ ] **Step 2:** Run `npx playwright test -g "short sits|still needs|check-in"`. Expected: FAIL.
 - [ ] **Step 3: Implement.**
-  - The Meditate row becomes `row({ href: '#garden', img: 'lotus-' + stage, title: 'Water your lotus', sub, cls })`.
-    - `sub`: `Watered today`, or `N more minutes today`; at stage 0 it's `Plant your seed`.
-    - Extend `row` only if it can't show a small image. Otherwise use `ic: 'lotus'`.
-  - The homecard text uses the new `streak()`: `N days in a row. Your lotus is growing.`
-  - In session end, compare `watered(today)` before and after adding the minutes, and call `tendLotus()`. When it flips to true, add a line above the statrow: `Your lotus is watered · Stage N` and a `See your lotus` link to `#garden`.
-  - Reminder 101 body: `Your lotus needs water: 5 minutes of stillness.` (title unchanged).
+  - In session end, compare `watered(today)` before and after adding the minutes, and call `tendLotus()`.
+  - When it flips to true, add `Your lotus is watered · Stage N` above the statrow and a `See your lotus` link to `#today`.
+  - The streak stat uses the new `streak()`.
+  - In Stats, add a `Screen Time check-in` row under the tiles, with the same sheet as before.
+  - Reminder 101 body: `Your lotus needs water: 5 minutes of stillness.`
 - [ ] **Step 4:** Run `npm test`. Expected: all pass.
-- [ ] **Step 5:** Update the README Garden row: "Daily lotus: a 5-minute sit each day grows a seed through 10 stages; missed days wilt it". Update `appstore/metadata.json` so the garden bullet says the same. Re-run `npm test`.
-- [ ] **Step 6:** Commit: `git commit -m "Lotus on Home, after a sit and in the reminder"`
+- [ ] **Step 5:** Commit: `git commit -m "Lotus after a sit, check-in in Stats, reminder text"`
+
+### Task 4: Store and docs
+
+- [ ] **Step 1:**
+  - README: change the Home and Garden rows to "Home is the daily lotus: a 5-minute sit each day grows a seed through 10 stages; missed days wilt it".
+  - `appstore/metadata.json`: update the "A LITTLE SPACE EACH DAY" bullets and the review notes (step 6, the check-in, is now in Stats).
+  - `appstore/testflight.md` item 6.
+- [ ] **Step 2:**
+  - Remove art that's no longer used (`home`, `garden`, `evening`), unless onboarding uses it. Remove it from `sw.js` too.
+  - Reshoot the store screenshots with the scratchpad `store.js`. Seed a stage-6 lotus and replace `05-garden` with a wilted or bloomed shot.
+- [ ] **Step 3:** Run `npm test`, then commit: `git commit -m "Docs and store for the daily lotus"`

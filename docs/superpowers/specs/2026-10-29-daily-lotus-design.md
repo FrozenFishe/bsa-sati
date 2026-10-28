@@ -74,20 +74,32 @@ same and only the plant changes. Wilting is a CSS filter (desaturate, lower brig
 
 ## Where it shows up
 
-- **Garden (#garden)** replaces today's Seed/Sprout/Bloom page. It shows the stage picture large,
-  "Stage 4 of 10 · Leaves", and a 10-step progress bar. Today's state reads "Watered today" or
-  "Needs water: sit 5 minutes", with the minutes still left and a **Sit 5 minutes** button. Below
-  that are the last 7 days (watered, missed or extra care) and the Bloomed count.
-- **Home:** the "Meditate" row at the top of the daily practice list becomes the lotus row. It shows
-  a small stage picture, "Water your lotus: 5 min sit", and how many minutes are left today. A done
-  tick replaces this when the minimum is met. The big Begin button still uses the user's own sit
-  length, for example 10 min, which also meets the 5. *(My call.)*
-- **Session complete:** when a sit takes the day to 5 minutes or more, the screen shows
-  "Your lotus is watered", the new stage and a **See your lotus** link. The garden then plays a short
-  watering and growing animation once, and respects reduced motion.
+**Home is the lotus (Rafael, 29 Oct: fewer options, one whole thing).** Home and the garden become one
+screen (`#garden` now opens Home). From top to bottom:
+
+- header
+- the big stage picture (faded when wilting)
+- "Stage 4 of 10 · Leaves" and a 10-step bar
+- "Needs water: N more minutes today" or "Watered today"
+- the streak ("6 days in a row")
+- one button: **Water your lotus · 5 min**, **Plant your seed** or **Plant a new seed**
+- the last 7 days as dots (watered, missed, or not planted), with a small drop on days with study or
+  a lesson
+- the Bloomed count
+- the news line ("lost a stage", "withered", "bloomed"), shown once
+
+Removed from Home: the daily practice list (Focus study and lesson rows), "View all practices"
+(the Refuges and kindness checks), the evening version and the Padma hero picture. Focus study and
+lessons stay in Learn. The Screen Time check-in moves to Stats. The Refuges and kindness checks go
+away. *(My call, which Rafael picked from a preview.)*
+
+- **Session complete:** when a sit takes the day to 5 minutes or more, the screen shows "Your lotus is
+  watered · Stage N" and a **See your lotus** link to Home. Home then plays a short growing
+  animation once, and respects reduced motion.
 - **Reminder:** the morning sit reminder (id 101) gets new text, "Your lotus needs water: 5 minutes
   of stillness". The evening study reminder stays as it is. *(My call: making the reminder skip days
   that are already done is native work, so it's out of scope.)*
+- **App Store:** reshoot the Home and garden screenshots, and update the README and store text.
 
 ## Data
 
