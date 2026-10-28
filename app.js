@@ -266,7 +266,7 @@
     }).join('');
     return `<div class="stack lotushome">
       ${header()}
-      <figure class="lotus ${L.missed ? 'wilt' : ''} ${L.grownOn === today && L.seen !== today ? 'grow' : ''}">${img('garden')}</figure>
+      <figure class="lotus ${L.missed ? 'wilt' : ''} ${L.grownOn === today && L.seen !== today ? 'grow' : ''}">${img('lotus-' + L.stage)}</figure>
       <div class="center">
         <h1>${L.stage ? `Stage ${L.stage} of 10 · ${LOTUS_NAMES[L.stage]}` : 'A seed in your hand'}</h1>
         <div class="lotusbar" role="img" aria-label="${L.stage} of 10 stages">${[...Array(10)].map((_, i) => `<i class="${i < L.stage ? 'on' : ''}"></i>`).join('')}</div>
