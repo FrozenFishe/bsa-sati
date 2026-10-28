@@ -152,7 +152,7 @@
       else if (++L.missed >= 3) { L.stage = 0; L.news = 'withered'; }
       else { L.stage = Math.max(1, L.stage - 1); L.news = 'wilted'; }
     }
-    if (growing() && watered(today) && L.grownOn !== today) grow(today);
+    if (growing() && watered(today) && L.grownOn !== today && today > L.checked) grow(today); // a date already settled can't grow again
     if (!L.checked || L.checked < yest) L.checked = yest;
     save();
   }
@@ -348,6 +348,7 @@
   const mmss = (s) => `${Math.floor(s / 60)}:${pad(Math.floor(s % 60))}`;
   function runSession(o) {
     // o: { kind: 'med'|'study', minutes (0 = open), tech?, interval?, task?, breakMin? }
+    const began = dayKey(); // a sit past midnight counts for the day it began
     bell(); keepAwake(true);
     document.body.classList.add('immersive');
     const open = !o.minutes, total = o.minutes * 60, startedAt = Date.now();
@@ -394,11 +395,11 @@
       clearInterval(iv); document.removeEventListener('visibilitychange', onVis);
       keepAwake(false); endAlert(); if (complete || open) bell();
       const m = Math.round((open ? elapsed() : Math.min(elapsed(), total)) / 60 * 10) / 10;
-      const d = day(), good = m >= 1, was = watered(dayKey());
+      const d = day(began), good = m >= 1, was = watered(began);
       if (good) { if (o.kind === 'med') d.med += m; else d.study += m; d.sessions++; }
       d.wanders += wanders; save();
       tendLotus();
-      const wet = !was && S.lotus.grownOn === dayKey();
+      const wet = !was && S.lotus.grownOn === began;
       haptic('success');
       if (good && o.kind === 'med' && S.health) plug('SatiHealth')?.saveMindfulSession({ start: Date.now() - m * 60000, end: Date.now() }).catch(() => {});
       document.body.classList.remove('immersive');

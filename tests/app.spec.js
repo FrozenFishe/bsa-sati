@@ -252,7 +252,7 @@ test('a bloomed lotus does not wilt', async ({ page }) => {
 });
 
 test('a clock moved back leaves the lotus alone', async ({ page }) => {
-  await lotusUser(page, { stage: 4, planted: ago(4), checked: ago(-3), grownOn: ago(-3) });
+  await lotusUser(page, { stage: 4, planted: ago(4), checked: ago(-3), grownOn: ago(-3) }, { 0: 6 });
   await expect(page.locator('h1')).toContainText('Stage 4 of 10');
 });
 
@@ -283,4 +283,16 @@ test('two short sits water the lotus', async ({ page }) => {
 test('home shows what the lotus still needs', async ({ page }) => {
   await lotusUser(page, { stage: 3, planted: ago(3), checked: ago(1), grownOn: ago(1) }, { 0: 2 });
   await expect(page.locator('#view')).toContainText('Needs water: 3 more minutes today');
+});
+
+test('a sit that runs past midnight counts for the day it began', async ({ page }) => {
+  const start = new Date(); start.setHours(23, 58, 0, 0);
+  await page.clock.install({ time: start });
+  await page.goto('./#sit');
+  await page.reload();
+  await page.click('[data-act=dur][data-v="5"]');
+  await page.click('[data-act=start]');
+  await page.clock.fastForward('05:01');
+  await expect(page.locator('h1')).toHaveText('You made space.');
+  expect((await state(page)).days[key(start)].med).toBe(6 + 5);
 });
