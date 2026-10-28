@@ -394,9 +394,11 @@
       clearInterval(iv); document.removeEventListener('visibilitychange', onVis);
       keepAwake(false); endAlert(); if (complete || open) bell();
       const m = Math.round((open ? elapsed() : Math.min(elapsed(), total)) / 60 * 10) / 10;
-      const d = day(), good = m >= 1;
+      const d = day(), good = m >= 1, was = watered(dayKey());
       if (good) { if (o.kind === 'med') d.med += m; else d.study += m; d.sessions++; }
       d.wanders += wanders; save();
+      tendLotus();
+      const wet = !was && S.lotus.grownOn === dayKey();
       haptic('success');
       if (good && o.kind === 'med' && S.health) plug('SatiHealth')?.saveMindfulSession({ start: Date.now() - m * 60000, end: Date.now() }).catch(() => {});
       document.body.classList.remove('immersive');
@@ -409,6 +411,7 @@
         <div class="hero">${img('complete')}</div>
         <div class="center"><div class="eyebrow">${good ? 'Sādhu, sādhu, sādhu' : 'Every return counts'}</div><h1>${good ? 'You made space.' : 'Short and sweet.'}</h1>
           <p class="lead">${good ? `${fmtMin(m)} of ${o.kind === 'med' ? 'meditation' : 'focused study'}.` : 'Sessions under a minute aren’t counted. Every return still matters.'}</p></div>
+        ${wet ? `<a class="watered" href="#today">${icon('drop')}<span>Your lotus is watered · Stage ${S.lotus.stage}</span><b>See your lotus${icon('arrow')}</b></a>` : ''}
         ${good ? `<div class="statrow">${stats.map(([ic, b, s]) => `<div>${icon(ic)}<b>${b}</b><span>${s}</span></div>`).join('')}</div>` : ''}
         <div class="reflect"><label for="note">${icon('sparkle')}What will you carry forward?</label><textarea id="note" maxlength="200" placeholder="A thought, a feeling, or nothing at all…">${esc(d.note || '')}</textarea></div>
         ${brk ? `<button class="btn block" id="brk">Take a ${o.breakMin}-minute break${icon('arrow')}</button><p class="center"><a class="textlink" href="#today">Back to today</a></p>` : '<a class="btn block" href="#today">Back to today</a>'}
@@ -792,7 +795,7 @@
       await LN.cancel({ notifications: [{ id: 101 }, { id: 102 }] }).catch(() => {});
       const on = (t) => { const [hour, minute] = t.split(':').map(Number); return { hour, minute }; };
       await LN.schedule({ notifications: [
-        { id: 101, title: 'Time to sit \u{1FAB7}', body: 'Padma is waiting. A few minutes of stillness?', schedule: { on: on(S.reminders.morning), allowWhileIdle: true }, extra: { hash: '#sit' } },
+        { id: 101, title: 'Time to sit \u{1FAB7}', body: 'Your lotus needs water: 5 minutes of stillness.', schedule: { on: on(S.reminders.morning), allowWhileIdle: true }, extra: { hash: '#sit' } },
         { id: 102, title: 'Evening study \u{1F4D6}', body: 'One focused session, one gentle return at a time.', schedule: { on: on(S.reminders.evening), allowWhileIdle: true }, extra: { hash: '#learn/focus' } }
       ] });
       return true;

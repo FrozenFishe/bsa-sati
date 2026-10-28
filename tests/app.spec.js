@@ -265,3 +265,22 @@ test('restore fills in a missing lotus', async ({ page }) => {
   await expect(page.locator('.toast')).toHaveText('Backup restored');
   expect((await state(page)).lotus.stage).toBe(0);
 });
+
+test('two short sits water the lotus', async ({ page }) => {
+  await page.clock.install();
+  await lotusUser(page, { stage: 3, planted: ago(3), checked: ago(1), grownOn: ago(1) });
+  for (let i = 0; i < 2; i++) {
+    await page.goto('./#sit');
+    await page.reload();
+    await page.click('[data-act=dur][data-v="5"]');
+    await page.click('[data-act=start]');
+    await page.clock.fastForward('03:00');
+    await page.click('#end');
+  }
+  await expect(page.locator('#view')).toContainText('Your lotus is watered · Stage 4');
+});
+
+test('home shows what the lotus still needs', async ({ page }) => {
+  await lotusUser(page, { stage: 3, planted: ago(3), checked: ago(1), grownOn: ago(1) }, { 0: 2 });
+  await expect(page.locator('#view')).toContainText('Needs water: 3 more minutes today');
+});
