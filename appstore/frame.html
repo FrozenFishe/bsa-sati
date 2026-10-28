@@ -1,5 +1,5 @@
 <!doctype html><html><head><meta charset="utf-8">
-<!-- App Store screenshot frame: 440x956 (shoot at 3x for 1320x2868; ?z=.9136 for 6.3"). Params: h, s, v, bg. -->
+<!-- App Store screenshot frame: 440x956 (shoot at 3x for 1320x2868; ?z=.9136 for 6.3"). Params: h, s, v, bg, stage (lotus stage, default 6). -->
 <style>
 @font-face{font-family:Fraunces;font-weight:400 700;src:url(../fonts/fraunces-latin.woff2) format("woff2")}
 html,body{margin:0;width:440px;height:956px;overflow:hidden}
@@ -20,7 +20,9 @@ document.getElementById('h').innerHTML=q.get('h')||''; document.getElementById('
 const notes=['Slow down before replying','Kinder to myself today','The breath was there all along'];
 const days={}; for(let i=0;i<30;i++){if(i%7===5)continue;const d=new Date();d.setDate(d.getDate()-i);
  days[k(d)]={med:10+(i*7)%15,study:20+(i*11)%40,present:i%3,mindful:1,wanders:i%2,lessons:i%4?0:1,sessions:2,screen:1.6+(i%4)*.3,pickups:40+i,apps:{instagram:30+i,youtube:18},checks:{refuge:true},...(i<6&&i%2===0?{note:notes[i/2]}:{})}}
-localStorage['sati.v1']=JSON.stringify({onboarded:true,theme:'light',bell:false,days,lessons:{refuges:k(new Date()),truths:'x',path:'x'},
+const st=+(q.get('stage')||6), y=new Date(); y.setDate(y.getDate()-1), p0=new Date(); p0.setDate(p0.getDate()-st);
+const lotus={stage:st,planted:k(p0),checked:k(y),grownOn:k(new Date()),missed:0,bloomed:st===10?1:0,news:null,seen:k(new Date())};
+localStorage['sati.v1']=JSON.stringify({onboarded:true,theme:'light',bell:false,days,lotus,lessons:{refuges:k(new Date()),truths:'x',path:'x'},
  apps:['instagram','tiktok','youtube','x'],
  guards:[{id:'g1',preset:'study',name:'Study Hall',start:'00:00',end:'23:59',days:[0,1,2,3,4,5,6],apps:[],on:true},{id:'g2',preset:'night',name:'Night Rest',start:'21:30',end:'06:30',days:[0,1,2,3,4,5,6],apps:[],on:true}]});
 document.getElementById('f').src='../index.html#'+(q.get('v')||'today');
