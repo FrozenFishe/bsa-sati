@@ -260,13 +260,13 @@
       : L.stage ? 'Fully bloomed. Plant a new seed to begin again.' : 'Plant it, then sit 5 minutes a day to help it grow.';
     const week = [...Array(7)].map((_, i) => {
       const dt = addDays(new Date(), i - 6), k = dayKey(dt), p = peek(k);
-      const s = watered(k) ? 'wet' : L.planted && k >= L.planted && k < today ? 'dry' : '';
+      const s = watered(k) ? 'wet' : growing && L.planted && k >= L.planted && k < today ? 'dry' : '';
       const care = p && (p.study > 0 || p.lessons > 0);
       return `<li class="${s}" aria-label="${DAYN[dt.getDay()]}: ${s === 'wet' ? 'watered' : s === 'dry' ? 'missed' : 'no sit'}${care ? ', extra care' : ''}"><span>${DAYN[dt.getDay()][0]}</span><i></i>${care ? icon('drop', 'i care') : ''}</li>`;
     }).join('');
     return `<div class="stack lotushome">
       ${header()}
-      <figure class="lotus ${L.missed ? 'wilt' : ''} ${L.grownOn === today && L.seen !== today ? 'grow' : ''}">${img('lotus-' + L.stage)}</figure>
+      <figure class="lotus ${growing && L.missed ? 'wilt' : ''} ${L.grownOn === today && L.seen !== today ? 'grow' : ''}">${img('lotus-' + L.stage)}</figure>
       <div class="center">
         <h1>${L.stage ? `Stage ${L.stage} of 10 · ${LOTUS_NAMES[L.stage]}` : 'A seed in your hand'}</h1>
         <div class="lotusbar" role="img" aria-label="${L.stage} of 10 stages">${[...Array(10)].map((_, i) => `<i class="${i < L.stage ? 'on' : ''}"></i>`).join('')}</div>
@@ -940,9 +940,9 @@
     V[name].bind?.(arg && decodeURIComponent(arg));
     view.querySelectorAll('input[type=range]').forEach(fill);
     if (location.hash !== shown) { shown = location.hash; view.classList.add('enter'); } // fade in new screens, not re-renders
-    const tab = { lesson: 'learn', pause: 'guard', garden: 'today' }[name] || name;
+    const tab = { lesson: 'learn', pause: 'guard' }[name] || name;
     document.querySelectorAll('#tabs a').forEach((a) => a.classList.toggle('on', a.dataset.tab === tab));
-    const t = { today: 'Sati', garden: 'Padma’s garden', sit: 'Sit', learn: 'Learn', lesson: 'Learn', guard: 'Guard', pause: 'Pause', stats: 'Stats', settings: 'Settings', welcome: 'Welcome' }[name];
+    const t = { today: 'Sati', sit: 'Sit', learn: 'Learn', lesson: 'Learn', guard: 'Guard', pause: 'Pause', stats: 'Stats', settings: 'Settings', welcome: 'Welcome' }[name];
     document.title = t === 'Sati' ? 'Sati — Meditate & Study' : `${t} · Sati`;
   }
 

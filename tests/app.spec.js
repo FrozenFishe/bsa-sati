@@ -225,6 +225,8 @@ test('three missed days wither the lotus', async ({ page }) => {
   await lotusUser(page, { stage: 6, planted: ago(9), checked: ago(4), grownOn: ago(4) });
   await expect(page.locator('#view')).toContainText('withered');
   await expect(page.getByRole('button', { name: 'Plant your seed' })).toBeVisible();
+  await expect(page.locator('.lotus.wilt')).toHaveCount(0);
+  await expect(page.locator('.lotusweek li.dry')).toHaveCount(0);
 });
 
 test('a long absence withers the lotus once', async ({ page }) => {
@@ -249,6 +251,23 @@ test('planting the lotus on a watered day reaches stage 2', async ({ page }) => 
 test('a bloomed lotus does not wilt', async ({ page }) => {
   await lotusUser(page, { stage: 10, planted: ago(16), checked: ago(6), grownOn: ago(6), bloomed: 1 });
   await expect(page.locator('h1')).toContainText('Bloom');
+  await expect(page.locator('.lotusweek li.dry')).toHaveCount(0);
+});
+
+test('days before planting are not missed', async ({ page }) => {
+  await lotusUser(page, { stage: 1, planted: ago(0) });
+  await expect(page.locator('h1')).toContainText('Stage 1 of 10');
+  await expect(page.locator('#view')).not.toContainText('lost a stage');
+  await expect(page.locator('.lotusweek li.dry')).toHaveCount(0);
+});
+
+test('a partial lotus is filled in', async ({ page }) => {
+  const s = seed(); s.lotus = { stage: 3 };
+  await page.evaluate((x) => localStorage.setItem('sati.v1', JSON.stringify(x)), s);
+  await page.goto('./#today');
+  await page.reload();
+  await expect(page.locator('h1')).toContainText('Stage 3 of 10');
+  expect((await state(page)).lotus).toMatchObject({ stage: 3, missed: 0, bloomed: 0 });
 });
 
 test('a clock moved back leaves the lotus alone', async ({ page }) => {
