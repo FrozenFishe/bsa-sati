@@ -4,6 +4,7 @@
   "private": true,
   "description": "Sati — meditation and study app for the Buddhist Society of Australia",
   "scripts": {
+    "test": "node --test",
     "build": "./build.sh",
     "ios": "./build.sh && npx cap sync ios",
     "deploy": "./build.sh && wrangler deploy"
