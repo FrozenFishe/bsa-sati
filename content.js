@@ -4,12 +4,12 @@ window.LESSONS = [
   {
     id: 'refuges',
     title: 'The Three Refuges',
-    pali: 'Tisarana',
+    pali: 'Tisaraṇa',
     minutes: 4,
     body: [
       'Taking refuge is the traditional starting point of Buddhist practice. One takes refuge in the Buddha (the awakened teacher and the potential for awakening), the Dhamma (the teaching and the truth it points to) and the Sangha (the community of practitioners, especially those who have realised the path).',
       'These are often called the Triple Gem because, like jewels, they are rare and valuable. Refuge is not blind faith: it is confidence that grows as the teaching is tested in one’s own experience.',
-      'The traditional formula is recited three times: Buddham saranam gacchami, Dhammam saranam gacchami, Sangham saranam gacchami.'
+      'The traditional formula is recited three times: Buddhaṃ saraṇaṃ gacchāmi, Dhammaṃ saraṇaṃ gacchāmi, Saṅghaṃ saraṇaṃ gacchāmi.'
     ],
     terms: [['Buddha', 'The awakened one'], ['Dhamma', 'The teaching; the way things are'], ['Sangha', 'The community of practice']],
     quiz: [
@@ -21,7 +21,7 @@ window.LESSONS = [
   {
     id: 'truths',
     title: 'The Four Noble Truths',
-    pali: 'Cattari Ariyasaccani',
+    pali: 'Cattāri Ariyasaccāni',
     minutes: 6,
     body: [
       'The Buddha’s first teaching, at the Deer Park near Varanasi, set out four truths in the manner of a physician: the illness, its cause, its cure and the treatment.',
@@ -39,7 +39,7 @@ window.LESSONS = [
   {
     id: 'path',
     title: 'The Noble Eightfold Path',
-    pali: 'Ariya Atthangika Magga',
+    pali: 'Ariya Aṭṭhaṅgika Magga',
     minutes: 7,
     body: [
       'The fourth noble truth is a practical path with eight factors, traditionally grouped into three trainings.',
@@ -57,7 +57,7 @@ window.LESSONS = [
   {
     id: 'precepts',
     title: 'The Five Precepts',
-    pali: 'Pañcasila',
+    pali: 'Pañcasīla',
     minutes: 5,
     body: [
       'The five precepts are training rules undertaken voluntarily by lay practitioners. They are not commandments but commitments that protect oneself and others.',
@@ -74,7 +74,7 @@ window.LESSONS = [
   {
     id: 'marks',
     title: 'The Three Characteristics',
-    pali: 'Tilakkhana',
+    pali: 'Tilakkhaṇa',
     minutes: 5,
     body: [
       'All conditioned things share three characteristics: impermanence (anicca), unsatisfactoriness (dukkha) and not-self (anatta).',
@@ -90,7 +90,7 @@ window.LESSONS = [
   {
     id: 'brahmaviharas',
     title: 'The Four Divine Abidings',
-    pali: 'Brahmavihara',
+    pali: 'Brahmavihāra',
     minutes: 5,
     body: [
       'The brahmaviharas are four boundless qualities of heart: loving-kindness (metta), compassion (karuna), sympathetic joy (mudita) and equanimity (upekkha).',
@@ -140,8 +140,8 @@ window.LESSONS = [
 ];
 
 window.TECHNIQUES = [
-  { id: 'breath', name: 'Breath', sub: 'Ānāpānasati', cues: ['Settle the body. Let it be upright and at ease.', 'Feel the breath where it is clearest — nostrils, chest or belly.', 'Breathing in, know you are breathing in. Breathing out, know you are breathing out.', 'If the mind has wandered, that’s fine. Gently return.', 'Let the breath calm the whole body.'] },
-  { id: 'metta', name: 'Loving-kindness', sub: 'Mettā', cues: ['May I be well. May I be happy. May I be at peace.', 'Bring to mind someone who has helped you. May you be well.', 'Bring to mind a neutral person. May you be well.', 'Bring to mind someone difficult. May you, too, be free from suffering.', 'May all beings everywhere be happy and at ease.'] },
-  { id: 'body', name: 'Body scan', sub: 'Kāyānupassanā', cues: ['Bring attention to the top of the head.', 'Move slowly through the face, neck and shoulders.', 'Feel the arms, hands and fingers.', 'Notice the chest, belly and back rising with the breath.', 'Feel the legs and feet, in contact with the ground.'] },
-  { id: 'silent', name: 'Silent sit', sub: 'Just sitting', cues: [] }
+  { id: 'breath', name: 'Breath', sub: 'Ānāpānasati', line: 'Be here, now.', cues: ['Settle the body. Let it be upright and at ease.', 'Feel the breath where it is clearest — nostrils, chest or belly.', 'Breathing in, know you are breathing in. Breathing out, know you are breathing out.', 'If the mind has wandered, that’s fine. Gently return.', 'Let the breath calm the whole body.'] },
+  { id: 'metta', name: 'Loving-kindness', sub: 'Mettā', line: 'Kindness for you and others.', cues: ['May I be well. May I be happy. May I be at peace.', 'Bring to mind someone who has helped you. May you be well.', 'Bring to mind a neutral person. May you be well.', 'Bring to mind someone difficult. May you, too, be free from suffering.', 'May all beings everywhere be happy and at ease.'] },
+  { id: 'body', name: 'Body scan', sub: 'Kāyānupassanā', line: 'Notice and release tension.', cues: ['Bring attention to the top of the head.', 'Move slowly through the face, neck and shoulders.', 'Feel the arms, hands and fingers.', 'Notice the chest, belly and back rising with the breath.', 'Feel the legs and feet, in contact with the ground.'] },
+  { id: 'silent', name: 'Silent sit', sub: 'Just sitting', line: 'Open awareness.', cues: [] }
 ];

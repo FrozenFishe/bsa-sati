@@ -1,5 +1,5 @@
 #!/bin/sh
-# Local alternative to the GitHub workflow: archive and upload with the Apple ID signed into Xcode.
+# Archive and upload with the Apple ID signed into Xcode.
 # Usage: ios/release.sh <build-number>
 set -e
 cd "$(dirname "$0")/.."

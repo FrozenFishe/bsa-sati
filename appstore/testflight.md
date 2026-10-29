@@ -6,7 +6,7 @@ Paste into App Store Connect › Sati › TestFlight.
 
 **Beta App Description**
 
-Sati is a free meditation and study companion from the Buddhist Society of Australia. Padma the lotus thrives when you practise and wilts with distraction. Sit with a timer and singing bowl, study short Dharma lessons with flashcards, and set mindful "guards" for study and rest. No account, no ads, and your data stays on your device.
+Sati is a free meditation and study companion from the Buddhist Society of Australia. Padma the lotus keeps you company, and her garden grows as you practise. Sit with a timer and singing bowl, study short Dharma lessons with flashcards, and set mindful "guards" for study and rest. No account, no ads, and your data stays on your device.
 
 **Feedback Email:** info2@buddhistsocietiesofaustralia.org
 
@@ -24,8 +24,8 @@ Thanks for testing Sati! Please try these and send feedback with a screenshot (t
 3. Apple Health: when asked, allow Sati to write Mindful Minutes. After a sit, open Health › Mindfulness and check the minutes appear.
 4. Reminders: turn on a daily practice reminder and allow notifications. Did it arrive at the time you set?
 5. Guard tab: create a guard (e.g. Study Hall), set its times, and try the doorway (3 breaths, then "stay present" or "use with intention"). Is the setup clear?
-6. Home: after a few sits, is Padma's scene greener? Do the streak and daily checklist update?
+6. Home: after a few sits, do the daily practice list and the streak update? Tap Padma: does her garden grow?
 7. Dharma library: open a lesson and flip through its flashcards.
-8. Rewards: are the locked scenes and their unlock goals clear?
+8. Stats: switch between week, month and year. Do your minutes and reflections show up?
 
 Also tell us about anything confusing, any typos, or anything that felt slow. Sati is not a blocker yet: the Guard tab offers mindful pauses rather than locking other apps.

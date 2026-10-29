@@ -4,4 +4,5 @@ public/
 .DS_Store
 ios/App/App/public/
 ios/App/build/
-ios/App/build/
+test-results/
+playwright-report/
