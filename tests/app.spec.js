@@ -35,7 +35,7 @@ test.beforeEach(async ({ page }) => {
 });
 test.afterEach(async ({ page }) => expect(page.errors).toEqual([]));
 
-for (const route of ['today', 'garden', 'sit', 'learn', 'learn/focus', 'lesson/refuges', 'guard', 'stats', 'settings', 'pause/instagram']) {
+for (const route of ['today', 'sit', 'learn', 'learn/focus', 'lesson/refuges', 'guard', 'stats', 'settings', 'pause/instagram']) {
   test(`#${route} renders without sideways scroll`, async ({ page }) => {
     await page.goto(`./#${route}`);
     await page.reload();
@@ -139,9 +139,8 @@ test('a lesson can be marked studied', async ({ page }) => {
 });
 
 test('the Screen Time check-in saves', async ({ page }) => {
-  await page.goto('./#today');
+  await page.goto('./#stats');
   await page.reload();
-  await page.click('details.more summary');
   await page.click('[data-act=checkin]');
   await page.fill('input[name=h]', '2');
   await page.fill('input[name=m]', '30');
@@ -194,4 +193,125 @@ test('restore refuses a file that is not a backup', async ({ page }) => {
   await chooseFile(page, '[data-act=restore]', '{"hello":1}');
   await expect(page.locator('.toast')).toHaveText('That file isn’t a Sati backup');
   expect((await state(page)).guards.length).toBe(1);
+});
+
+// Daily lotus: a 5-minute sit waters it; missed days wilt it.
+const ago = (n) => { const d = new Date(); d.setDate(d.getDate() - n); return key(d); };
+async function lotusUser(page, lotus, med = {}) {
+  const s = seed(); s.days = {};
+  for (const [n, m] of Object.entries(med)) s.days[ago(n)] = { med: m, study: 0, lessons: 0 };
+  s.lotus = { stage: 0, planted: null, checked: null, grownOn: null, missed: 0, bloomed: 0, news: null, ...lotus };
+  await page.evaluate((x) => localStorage.setItem('sati.v1', JSON.stringify(x)), s);
+  await page.goto('./#garden');
+  await page.reload();
+}
+
+test('the lotus grows one stage per watered day', async ({ page }) => {
+  await lotusUser(page, { stage: 3, planted: ago(5), checked: ago(2), grownOn: ago(2) }, { 1: 6, 0: 6 });
+  await expect(page.locator('h1')).toContainText('Stage 5 of 10');
+  await page.reload();
+  await expect(page.locator('h1')).toContainText('Stage 5 of 10');
+});
+
+test('a missed day wilts the lotus one stage', async ({ page }) => {
+  await lotusUser(page, { stage: 4, planted: ago(6), checked: ago(2), grownOn: ago(2) });
+  await expect(page.locator('h1')).toContainText('Stage 3 of 10');
+  await expect(page.locator('#view')).toContainText('lost a stage');
+  await page.reload();
+  await expect(page.locator('#view')).not.toContainText('lost a stage');
+});
+
+test('three missed days wither the lotus', async ({ page }) => {
+  await lotusUser(page, { stage: 6, planted: ago(9), checked: ago(4), grownOn: ago(4) });
+  await expect(page.locator('#view')).toContainText('withered');
+  await expect(page.getByRole('button', { name: 'Plant your seed' })).toBeVisible();
+  await expect(page.locator('.lotus.wilt')).toHaveCount(0);
+  await expect(page.locator('.lotusweek li.dry')).toHaveCount(0);
+});
+
+test('a long absence withers the lotus once', async ({ page }) => {
+  await lotusUser(page, { stage: 6, planted: ago(50), checked: ago(41), grownOn: ago(41) });
+  await expect(page.getByRole('button', { name: 'Plant your seed' })).toBeVisible();
+  expect((await state(page)).lotus.stage).toBe(0);
+});
+
+test('stage 10 blooms the lotus and counts it', async ({ page }) => {
+  await lotusUser(page, { stage: 9, planted: ago(9), checked: ago(1), grownOn: ago(1) }, { 0: 6 });
+  await expect(page.locator('h1')).toContainText('Bloom');
+  await expect(page.locator('#view')).toContainText('1 lotus bloomed');
+  await expect(page.getByRole('button', { name: 'Plant a new seed' })).toBeVisible();
+});
+
+test('planting the lotus on a watered day reaches stage 2', async ({ page }) => {
+  await lotusUser(page, {}, { 0: 6 });
+  await page.getByRole('button', { name: 'Plant your seed' }).click();
+  await expect(page.locator('h1')).toContainText('Stage 2 of 10');
+});
+
+test('a bloomed lotus does not wilt', async ({ page }) => {
+  await lotusUser(page, { stage: 10, planted: ago(16), checked: ago(6), grownOn: ago(6), bloomed: 1 });
+  await expect(page.locator('h1')).toContainText('Bloom');
+  await expect(page.locator('.lotusweek li.dry')).toHaveCount(0);
+});
+
+test('days before planting are not missed', async ({ page }) => {
+  await lotusUser(page, { stage: 1, planted: ago(0) });
+  await expect(page.locator('h1')).toContainText('Stage 1 of 10');
+  await expect(page.locator('#view')).not.toContainText('lost a stage');
+  await expect(page.locator('.lotusweek li.dry')).toHaveCount(0);
+});
+
+test('a partial lotus is filled in', async ({ page }) => {
+  const s = seed(); s.lotus = { stage: 3 };
+  await page.evaluate((x) => localStorage.setItem('sati.v1', JSON.stringify(x)), s);
+  await page.goto('./#today');
+  await page.reload();
+  await expect(page.locator('h1')).toContainText('Stage 3 of 10');
+  expect((await state(page)).lotus).toMatchObject({ stage: 3, missed: 0, bloomed: 0 });
+});
+
+test('a clock moved back leaves the lotus alone', async ({ page }) => {
+  await lotusUser(page, { stage: 4, planted: ago(4), checked: ago(-3), grownOn: ago(-3) }, { 0: 6 });
+  await expect(page.locator('h1')).toContainText('Stage 4 of 10');
+});
+
+test('restore fills in a missing lotus', async ({ page }) => {
+  await page.goto('./#settings');
+  await page.reload();
+  const old = seed(); delete old.lotus;
+  page.once('dialog', (d) => d.accept());
+  await chooseFile(page, '[data-act=restore]', JSON.stringify(old));
+  await expect(page.locator('.toast')).toHaveText('Backup restored');
+  expect((await state(page)).lotus.stage).toBe(0);
+});
+
+test('two short sits water the lotus', async ({ page }) => {
+  await page.clock.install();
+  await lotusUser(page, { stage: 3, planted: ago(3), checked: ago(1), grownOn: ago(1) });
+  for (let i = 0; i < 2; i++) {
+    await page.goto('./#sit');
+    await page.reload();
+    await page.click('[data-act=dur][data-v="5"]');
+    await page.click('[data-act=start]');
+    await page.clock.fastForward('03:00');
+    await page.click('#end');
+  }
+  await expect(page.locator('#view')).toContainText('Your lotus is watered · Stage 4');
+});
+
+test('home shows what the lotus still needs', async ({ page }) => {
+  await lotusUser(page, { stage: 3, planted: ago(3), checked: ago(1), grownOn: ago(1) }, { 0: 2 });
+  await expect(page.locator('#view')).toContainText('Needs water: 3 more minutes today');
+});
+
+test('a sit that runs past midnight counts for the day it began', async ({ page }) => {
+  const start = new Date(); start.setHours(23, 58, 0, 0);
+  await page.clock.install({ time: start });
+  await page.goto('./#sit');
+  await page.reload();
+  await page.click('[data-act=dur][data-v="5"]');
+  await page.click('[data-act=start]');
+  await page.clock.fastForward('05:01');
+  await expect(page.locator('h1')).toHaveText('You made space.');
+  expect((await state(page)).days[key(start)].med).toBe(6 + 5);
 });

@@ -193,22 +193,29 @@ input[type=range]::-moz-range-thumb { width: 24px; height: 24px; border-radius: 
 #tabs a.center.on .fab { box-shadow: 0 0 0 3px var(--rose-soft), 0 6px 16px rgb(150 60 70 / 22%); }
 body.immersive #tabs { display: none; }
 
-/* Home */
-.garden-link { display: block; color: inherit; text-decoration: none; }
-.homecard { text-align: center; margin-top: -8px !important; }
-.homecard h2 { font-size: 27px; }
-.homecard p { color: var(--ink-2); margin: 4px 0 16px; }
+/* Home: the daily lotus */
 .divider { border: 0; border-top: 1px solid var(--line); margin: 22px 0 18px !important; }
-.evening { background: var(--surface); border: 1px solid var(--line); border-radius: 22px; padding: 20px; }
-.evening h2 { font-size: 30px; margin: 6px 0 4px; }
-
-/* Garden */
-.stages { display: flex; justify-content: center; align-items: flex-start; gap: 0; margin-top: -24px !important; position: relative; z-index: 1; }
-.stage { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 84px; font-size: 15px; color: var(--ink-2); }
-.stage .ico { background: var(--surface); border: 1px solid var(--line); color: var(--gold); }
-.stage.on { color: var(--ink); font-weight: 700; }
-.stage.on .ico { width: 62px; height: 62px; background: var(--leaf); color: #fff; border: 3px solid var(--surface); box-shadow: 0 0 0 1px var(--line); margin-top: -5px; }
-.stage-gap { flex: 1; max-width: 50px; border-top: 2px dotted var(--line); margin-top: 26px; }
+.lotus { margin: 0 auto; width: min(100%, 320px); }
+.lotus img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: var(--art-radius); -webkit-mask-image: var(--arcs-mask); mask-image: var(--arcs-mask); transition: filter .6s; }
+.lotus.wilt img { filter: grayscale(.6) brightness(.92); }
+.lotus.grow img { animation: grow 1.2s ease-out; }
+@keyframes grow { from { transform: scale(.96); opacity: .6; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .lotus.grow img { animation: none; } }
+.lotushome h1 { font-size: 30px; }
+.lotusbar { display: flex; gap: 4px; max-width: 260px; margin: 12px auto 0; }
+.lotusbar i { flex: 1; height: 8px; border-radius: 4px; background: var(--line); }
+.lotusbar i.on { background: var(--leaf); }
+.lotushome .lead { margin: 12px 0 0; }
+.news { margin: 14px 0 0; padding: 10px 14px; border-radius: 14px; background: var(--rose-soft); color: var(--ink); }
+.lotusweek { display: flex; justify-content: space-between; list-style: none; padding: 0; max-width: 300px; width: 100%; margin: 4px auto 0 !important; }
+.lotusweek li { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-2); }
+.lotusweek li > i { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--line); }
+.lotusweek li.wet > i { background: var(--leaf); border-color: var(--leaf); }
+.lotusweek li.dry > i { border-color: var(--rose); border-style: dashed; }
+.lotusweek .care { width: 12px; height: 12px; color: var(--gold); }
+.watered { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 16px; background: var(--sage-soft); color: var(--ink); text-decoration: none; font-weight: 500; }
+.watered span { flex: 1; }
+.watered b { display: flex; align-items: center; gap: 4px; font-size: 14px; color: var(--leaf-ink); white-space: nowrap; }
 
 /* Session (immersive) */
 .session { position: fixed; inset: 0; z-index: 30; display: flex; flex-direction: column; align-items: center; text-align: center; color: #f4efe4; background: radial-gradient(120% 70% at 50% 40%, #2c5545 0%, #1b3a2f 55%, #132a22 100%); overflow: hidden; }
